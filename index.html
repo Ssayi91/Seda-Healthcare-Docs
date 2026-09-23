@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seda Healthcare - Invoice & Agreement</title>
+    <style>
+        :root {
+            --primary: #0a0f0c;
+            --primary-soft: rgba(10, 15, 12, 0.04);
+            --text-main: #0a0f0c;
+            --text-muted: #4a5550;
+            --border: #d1d9d4;
+            --bg-body: #f4f4f0;
+            --bg-card: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Bookman Old Style', 'Bookman', 'URW Bookman L', 'Georgia', serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .btn-primary {
+            padding: 10px 22px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-family: 'Bookman Old Style', 'Bookman', 'Georgia', serif;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--primary);
+            color: #ffffff;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--primary);
+        }
+
+        .document {
+            background-color: var(--bg-card);
+            width: 210mm;
+            min-height: 297mm;
+            padding: 18mm 16mm;
+            border: 1px solid var(--border);
+            border-top: 5px solid var(--primary);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(10, 15, 12, 0.08);
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 4.5rem;
+            font-weight: bold;
+            color: var(--primary-soft);
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .brand h1 {
+            font-size: 1.4rem;
+            font-weight: normal;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.15rem;
+            color: var(--primary);
+        }
+
+        .tagline {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-style: italic;
+            letter-spacing: 0.05em;
+        }
+
+        .doc-title {
+            text-align: right;
+        }
+
+        .doc-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            font-weight: normal;
+        }
+
+        .doc-meta {
+            font-size: 0.75rem;
+        }
+
+        .doc-meta p {
+            margin-bottom: 0.15rem;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+            display: inline-block;
+            width: 45px;
+            text-align: right;
+            margin-right: 8px;
+            font-variant: small-caps;
+            letter-spacing: 0.08em;
+        }
+
+        .meta-value {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Parties */
+        .parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .party-block h3 {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: normal;
+        }
+
+        .party-block .name {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.15rem;
+        }
+
+        .party-block p {
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        /* Invoice Table */
+        .invoice-section {
+            margin-bottom: 1rem;
+        }
+
+        .invoice-section h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: normal;
+            border-bottom: 1px solid var(--primary);
+            padding-bottom: 0.25rem;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .invoice-table td {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        .invoice-table .item-name {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .item-detail {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 0.15rem;
+            line-height: 1.4;
+        }
+
+        .invoice-table .amount {
+            text-align: right;
+            width: 110px;
+            font-weight: bold;
+        }
+
+        .totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.75rem;
+        }
+
+        .totals-table {
+            font-size: 0.8rem;
+            min-width: 260px;
+        }
+
+        .totals-table .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .totals-table .row.deposit {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .totals-table .row.total {
+            border-bottom: none;
+            border-top: 2px solid var(--primary);
+            padding-top: 0.4rem;
+            margin-top: 0.2rem;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .totals-table .label {
+            color: var(--text-muted);
+        }
+
+        /* Payment Details */
+        .payment-section {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            background-color: rgba(10, 15, 12, 0.01);
+        }
+
+        .payment-section h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+            font-weight: normal;
+        }
+
+        .payment-grid {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.8rem;
+        }
+
+        .payment-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: baseline;
+        }
+
+        .payment-item .network {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            min-width: 70px;
+        }
+
+        .payment-item .number {
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 0.03em;
+        }
+
+        .payment-item .name {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-left: 0.5rem;
+        }
+
+        .payment-ref {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 0.4rem;
+            padding-top: 0.4rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Agreement Section */
+        .agreement-section {
+            margin-bottom: 0.75rem;
+        }
+
+        .agreement-section > h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+            font-weight: normal;
+            border-bottom: 1px solid var(--primary);
+            padding-bottom: 0.2rem;
+        }
+
+        .terms-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+        }
+
+        .term-item {
+            margin-bottom: 0.4rem;
+        }
+
+        .term-item h4 {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.15rem;
+            font-weight: normal;
+        }
+
+        .term-item p {
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        .exclusion-note {
+            background-color: rgba(10, 15, 12, 0.03);
+            padding: 0.4rem 0.75rem;
+            border-left: 2px solid var(--primary);
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Signatures */
+        .signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .signature-block p {
+            font-size: 0.75rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .signature-block .role {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.78rem;
+        }
+
+        .signature-line {
+            height: 1px;
+            background-color: var(--primary);
+            margin: 1.2rem 0 0.25rem 0;
+        }
+
+        .signer-name {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        .sign-date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .doc-footer {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+        }
+
+        .doc-footer .tagline-footer {
+            font-style: italic;
+            color: var(--primary);
+            margin-top: 0.2rem;
+            font-size: 0.75rem;
+        }
+
+        /* Print */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .no-print { display: none !important; }
+            .document {
+                box-shadow: none;
+                border: none;
+                border-top: 5px solid #000;
+                border-radius: 0;
+                width: 100%;
+                min-height: auto;
+                padding: 15mm 14mm;
+            }
+            .watermark {
+                color: rgba(0, 0, 0, 0.04) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .document {
+                width: 100%;
+                padding: 1.5rem 1rem;
+                min-height: auto;
+                border-radius: 12px;
+            }
+            .parties, .terms-grid, .signatures {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            .payment-grid {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print controls">
+        <button id="downloadBtn" class="btn-primary">Download PDF</button>
+    </div>
+
+    <div class="document">
+        <div class="watermark">SONNY SAYI SOLUTIONS</div>
+        <div class="content">
+            <!-- Header -->
+            <header class="doc-header">
+                <div class="brand">
+                    <h1>Sonny Sayi Solutions</h1>
+                    <p class="tagline">Web Development • IT Solutions • Digital Systems</p>
+                </div>
+                <div class="doc-title">
+                    <h2>INVOICE &amp; AGREEMENT</h2>
+                    <div class="doc-meta">
+                        <p><span class="meta-label">No.</span> <span class="meta-value">SSS-INV-020</span></p>
+                        <p><span class="meta-label">Date</span> <span class="meta-value">23 September 2026</span></p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Parties -->
+            <section class="parties">
+                <div class="party-block">
+                    <h3>Prepared For</h3>
+                    <p class="name">Seda Healthcare Solutions Ltd</p>
+                    <p>Medical Equipment &amp; Consumables Supply<br>Nairobi, Kenya</p>
+                </div>
+                <div class="party-block">
+                    <h3>Prepared By</h3>
+                    <p class="name">Sonny Sayi Solutions</p>
+                    <p>Nairobi, Kenya<br>info@sonnysayisolutions.co.ke<br>0736 194 051</p>
+                </div>
+            </section>
+
+            <!-- Invoice -->
+            <section class="invoice-section">
+                <h3>Invoice Details</h3>
+                <table class="invoice-table">
+                    <tr>
+                        <td>
+                            <span class="item-name">Website Design &amp; Development</span>
+                            <span class="item-detail">Professional responsive website for Seda Healthcare Solutions Ltd — including 5 core pages (Home, About, Services, Why Choose Us, Contact), SEO-ready structure, WhatsApp quick-contact, and contact form.</span>
+                        </td>
+                        <td class="amount">KES 35,000</td>
+                    </tr>
+                </table>
+                <div class="totals">
+                    <div class="totals-table">
+                        <div class="row"><span class="label">Total Project Value</span><span>KES 35,000</span></div>
+                        <div class="row deposit"><span class="label">Deposit Required (50%)</span><span>KES 17,500</span></div>
+                        <div class="row deposit"><span class="label">Balance on Completion (50%)</span><span>KES 17,500</span></div>
+                        <div class="row total"><span class="label">Amount Due</span><span>KES 17,500</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment -->
+            <section class="payment-section">
+                <h3>Remittance Details</h3>
+                <div class="payment-grid">
+                    <div class="payment-item">
+                        <span class="network">Safaricom</span>
+                        <span class="number">0723 293 901</span>
+                        <span class="name">Sonny Sayi</span>
+                    </div>
+                    <div class="payment-item">
+                        <span class="network">Airtel</span>
+                        <span class="number">0736 194 051</span>
+                        <span class="name">Sonny Sayi</span>
+                    </div>
+                </div>
+                <p class="payment-ref">Please reference Invoice No. SSS-INV-020 in the payment description.</p>
+            </section>
+
+            <!-- Agreement Terms -->
+            <section class="agreement-section">
+                <h3>Service Agreement Terms</h3>
+                <div class="terms-grid">
+                    <div class="term-item">
+                        <h4>Scope of Work</h4>
+                        <p>Design, develop, and deploy a professional responsive website with 5 core pages, contact form, WhatsApp integration, and SEO-ready structure.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Timeline</h4>
+                        <p>Development will be completed within a maximum of three (3) days from the commencement of work.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Payment Terms</h4>
+                        <p>50% deposit (KES 17,500) required before development begins. Remaining 50% due upon completion and prior to final deployment.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Revisions</h4>
+                        <p>Two (2) rounds of revisions are included during design and development. Additional revisions or out-of-scope features will be quoted separately.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Client Responsibilities</h4>
+                        <p>Client to provide all required materials and content necessary for the website development.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Intellectual Property</h4>
+                        <p>Upon full payment, client owns all rights to the final website. Provider retains the right to display the project in their portfolio.</p>
+                    </div>
+                </div>
+                <div class="exclusion-note">
+                    <strong>Note:</strong> This agreement covers website design and development only. Custom business email setup is explicitly excluded from this scope and may be quoted separately if required.
+                </div>
+            </section>
+
+            <!-- Signatures -->
+            <section class="signatures">
+                <div class="signature-block">
+                    <p class="role">For: Seda Healthcare Solutions Ltd</p>
+                    <p class="signer-name">Virginia, Senior Sales Director.
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="doc-footer">
+                <p>www.sonnysayisolutions.co.ke • info@sonnysayisolutions.co.ke • 0736 194 051</p>
+                <p class="tagline-footer">Digital Clarity for Business Growth.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>
