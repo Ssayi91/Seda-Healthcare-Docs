@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seda Healthcare - Invoice & Agreement</title>
+    <title>Seda Healthcare - Paid Invoice & Receipt</title>
     <style>
         :root {
             --primary: #0a0f0c;
@@ -13,6 +13,7 @@
             --border: #d1d9d4;
             --bg-body: #f4f4f0;
             --bg-card: #ffffff;
+            --accent: #1a5e20; /* Green for "Paid" status */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -82,6 +83,23 @@
             pointer-events: none;
             z-index: 0;
             user-select: none;
+        }
+
+        .paid-stamp {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            border: 3px solid var(--accent);
+            color: var(--accent);
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transform: rotate(-12deg);
+            opacity: 0.8;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            z-index: 2;
         }
 
         .content {
@@ -222,6 +240,14 @@
             line-height: 1.4;
         }
 
+        .live-link {
+            color: var(--accent);
+            font-style: normal;
+            font-weight: bold;
+            text-decoration: none;
+            border-bottom: 1px dotted var(--accent);
+        }
+
         .invoice-table .amount {
             text-align: right;
             width: 110px;
@@ -246,7 +272,7 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .totals-table .row.deposit {
+        .totals-table .row.paid {
             color: var(--text-muted);
             font-style: italic;
         }
@@ -258,7 +284,7 @@
             margin-top: 0.2rem;
             font-size: 0.95rem;
             font-weight: bold;
-            color: var(--primary);
+            color: var(--accent);
         }
 
         .totals-table .label {
@@ -271,14 +297,14 @@
             border-radius: 8px;
             padding: 0.75rem 1rem;
             margin-bottom: 1rem;
-            background-color: rgba(10, 15, 12, 0.01);
+            background-color: rgba(26, 94, 32, 0.03); /* Subtle green tint for paid */
         }
 
         .payment-section h3 {
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.15em;
-            color: var(--primary);
+            color: var(--accent);
             margin-bottom: 0.4rem;
             font-weight: normal;
         }
@@ -366,59 +392,21 @@
             color: var(--text-main);
         }
 
-        .exclusion-note {
-            background-color: rgba(10, 15, 12, 0.03);
-            padding: 0.4rem 0.75rem;
-            border-left: 2px solid var(--primary);
+        .completion-note {
+            background-color: rgba(26, 94, 32, 0.08);
+            padding: 0.5rem 0.75rem;
+            border-left: 3px solid var(--accent);
             border-radius: 4px;
-            font-size: 0.72rem;
-            font-style: italic;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-        }
-
-        /* Signatures */
-        .signatures {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 1rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .signature-block p {
             font-size: 0.75rem;
-            margin-bottom: 0.15rem;
-        }
-
-        .signature-block .role {
+            color: var(--accent);
+            margin-top: 0.5rem;
             font-weight: bold;
-            color: var(--primary);
-            font-size: 0.78rem;
-        }
-
-        .signature-line {
-            height: 1px;
-            background-color: var(--primary);
-            margin: 1.2rem 0 0.25rem 0;
-        }
-
-        .signer-name {
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 0.8rem;
-        }
-
-        .sign-date {
-            font-size: 0.72rem;
-            color: var(--text-muted);
         }
 
         /* Footer */
         .doc-footer {
             text-align: center;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
             padding-top: 0.5rem;
             border-top: 1px solid var(--border);
             font-size: 0.7rem;
@@ -458,6 +446,12 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+            .paid-stamp {
+                border-color: #1a5e20 !important;
+                color: #1a5e20 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
 
         @media (max-width: 800px) {
@@ -467,7 +461,7 @@
                 min-height: auto;
                 border-radius: 12px;
             }
-            .parties, .terms-grid, .signatures {
+            .parties, .terms-grid {
                 grid-template-columns: 1fr;
                 gap: 0.75rem;
             }
@@ -480,11 +474,13 @@
 </head>
 <body>
     <div class="no-print controls">
-        <button id="downloadBtn" class="btn-primary">Download PDF</button>
+        <button id="downloadBtn" class="btn-primary">Download / Print PDF</button>
     </div>
 
     <div class="document">
         <div class="watermark">SONNY SAYI SOLUTIONS</div>
+        <div class="paid-stamp">PAID IN FULL</div>
+        
         <div class="content">
             <!-- Header -->
             <header class="doc-header">
@@ -493,10 +489,11 @@
                     <p class="tagline">Web Development • IT Solutions • Digital Systems</p>
                 </div>
                 <div class="doc-title">
-                    <h2>INVOICE &amp; AGREEMENT</h2>
+                    <h2>PAID INVOICE &amp; RECEIPT</h2>
                     <div class="doc-meta">
-                        <p><span class="meta-label">No.</span> <span class="meta-value">SSS-INV-020</span></p>
-                        <p><span class="meta-label">Date</span> <span class="meta-value">23 September 2026</span></p>
+                        <p><span class="meta-label">No.</span> <span class="meta-value">SSS-INV-020-FINAL</span></p>
+                        <p><span class="meta-label">Date</span> <span class="meta-value">12 October 2026</span></p>
+                        <p><span class="meta-label">Status</span> <span class="meta-value" style="color: var(--accent);">SETTLED</span></p>
                     </div>
                 </div>
             </header>
@@ -511,18 +508,23 @@
                 <div class="party-block">
                     <h3>Prepared By</h3>
                     <p class="name">Sonny Sayi Solutions</p>
-                    <p>Nairobi, Kenya<br>info@sonnysayisolutions.co.ke<br>0736 194 051</p>
+                    <p>Nairobi, Kenya<br>info@sonnysayisolutions.co.ke<br>+254 723 293 901 / 0736 194 051</p>
                 </div>
             </section>
 
             <!-- Invoice -->
             <section class="invoice-section">
-                <h3>Invoice Details</h3>
+                <h3>Project Completion &amp; Payment Details</h3>
                 <table class="invoice-table">
                     <tr>
                         <td>
-                            <span class="item-name">Website Design &amp; Development</span>
-                            <span class="item-detail">Professional responsive website for Seda Healthcare Solutions Ltd — including 5 core pages (Home, About, Services, Why Choose Us, Contact), SEO-ready structure, WhatsApp quick-contact, and contact form.</span>
+                            <span class="item-name">Website Design, Development &amp; Deployment</span>
+                            <span class="item-detail">
+                                Professional responsive website for Seda Healthcare Solutions Ltd. 
+                                Project successfully completed and hosted at: 
+                                <a href="https://sedahealthcare.co.ke/" class="live-link" target="_blank">https://sedahealthcare.co.ke/</a><br>
+                                Includes SEO-ready pages, responsive design, WhatsApp quick-contact, and contact form.
+                            </span>
                         </td>
                         <td class="amount">KES 35,000</td>
                     </tr>
@@ -530,76 +532,60 @@
                 <div class="totals">
                     <div class="totals-table">
                         <div class="row"><span class="label">Total Project Value</span><span>KES 35,000</span></div>
-                        <div class="row deposit"><span class="label">Deposit Required (50%)</span><span>KES 17,500</span></div>
-                        <div class="row deposit"><span class="label">Balance on Completion (50%)</span><span>KES 17,500</span></div>
-                        <div class="row total"><span class="label">Amount Due</span><span>KES 17,500</span></div>
+                        <div class="row paid"><span class="label">Less: Initial Deposit Paid</span><span>- KES 17,500</span></div>
+                        <div class="row paid"><span class="label">Less: Final Balance Paid</span><span>- KES 17,500</span></div>
+                        <div class="row total"><span class="label">Total Paid / Balance Due</span><span>KES 0</span></div>
                     </div>
                 </div>
             </section>
 
-            <!-- Payment -->
+            <!-- Payment Receipt -->
             <section class="payment-section">
-                <h3>Remittance Details</h3>
+                <h3>Payment Confirmation</h3>
                 <div class="payment-grid">
                     <div class="payment-item">
                         <span class="network">Safaricom</span>
                         <span class="number">0723 293 901</span>
-                        <span class="name">Sonny Sayi</span>
+                        <span class="name">Asanga Sayi</span>
                     </div>
                     <div class="payment-item">
                         <span class="network">Airtel</span>
                         <span class="number">0736 194 051</span>
-                        <span class="name">Sonny Sayi</span>
+                        <span class="name">Asanga Sayi</span>
                     </div>
                 </div>
-                <p class="payment-ref">Please reference Invoice No. SSS-INV-020 in the payment description.</p>
+                <p class="payment-ref">This document serves as an official receipt confirming that the total project value of <strong>KES 35,000</strong> has been received in full.</p>
             </section>
 
-            <!-- Agreement Terms -->
+            <!-- Handover Terms -->
             <section class="agreement-section">
-                <h3>Service Agreement Terms</h3>
+                <h3>Completion &amp; Handover Terms</h3>
                 <div class="terms-grid">
                     <div class="term-item">
-                        <h4>Scope of Work</h4>
-                        <p>Design, develop, and deploy a professional responsive website with 5 core pages, contact form, WhatsApp integration, and SEO-ready structure.</p>
-                    </div>
-                    <div class="term-item">
-                        <h4>Timeline</h4>
-                        <p>Development will be completed within a maximum of three (3) days from the commencement of work.</p>
-                    </div>
-                    <div class="term-item">
-                        <h4>Payment Terms</h4>
-                        <p>50% deposit (KES 17,500) required before development begins. Remaining 50% due upon completion and prior to final deployment.</p>
-                    </div>
-                    <div class="term-item">
-                        <h4>Revisions</h4>
-                        <p>Two (2) rounds of revisions are included during design and development. Additional revisions or out-of-scope features will be quoted separately.</p>
-                    </div>
-                    <div class="term-item">
-                        <h4>Client Responsibilities</h4>
-                        <p>Client to provide all required materials and content necessary for the website development.</p>
+                        <h4>Project Status</h4>
+                        <p>Development is 100% complete. The website is live, fully functional, and accessible at the agreed domain.</p>
                     </div>
                     <div class="term-item">
                         <h4>Intellectual Property</h4>
-                        <p>Upon full payment, client owns all rights to the final website. Provider retains the right to display the project in their portfolio.</p>
+                        <p>With full settlement confirmed, Seda Healthcare Solutions Ltd retains complete ownership and rights to the final website and all associated digital assets.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Credentials &amp; Access</h4>
+                        <p>All hosting credentials, and domain management details are provided by the client.</p>
+                    </div>
+                    <div class="term-item">
+                        <h4>Future Enhancements</h4>
+                        <p>Any future updates, feature additions, or maintenance outside the original scope will be quoted separately upon request.</p>
                     </div>
                 </div>
-                <div class="exclusion-note">
-                    <strong>Note:</strong> This agreement covers website design and development only. Custom business email setup is explicitly excluded from this scope and may be quoted separately if required.
-                </div>
-            </section>
-
-            <!-- Signatures -->
-            <section class="signatures">
-                <div class="signature-block">
-                    <p class="role">For: Seda Healthcare Solutions Ltd</p>
-                    <p class="signer-name">Virginia, Senior Sales Director.
+                <div class="completion-note">
+                    ✓ Project successfully deployed, fully paid, and handed over at https://sedahealthcare.co.ke/
                 </div>
             </section>
 
             <!-- Footer -->
             <footer class="doc-footer">
-                <p>www.sonnysayisolutions.co.ke • info@sonnysayisolutions.co.ke • 0736 194 051</p>
+                <p>www.sonnysayisolutions.co.ke • info@sonnysayisolutions.co.ke • +254 723 293 901</p>
                 <p class="tagline-footer">Digital Clarity for Business Growth.</p>
             </footer>
         </div>
